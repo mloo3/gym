@@ -28,7 +28,7 @@ class RobotEnv(gym.GoalEnv):
         self._viewers = {}
 
         self.metadata = {
-            'render.modes': ['human','keyboard', 'rgb_array'],
+            'render.modes': ['human','keyboard', 'controller','rgb_array'],
             'video.frames_per_second': int(np.round(1.0 / self.dt))
         }
 
@@ -102,6 +102,8 @@ class RobotEnv(gym.GoalEnv):
             self._get_viewer(mode).render()
         elif mode == 'keyboard':
             self._get_viewer(mode).render()
+        elif mode == 'controller':
+            self._get_viewer(mode).render()
 
     def _get_viewer(self, mode):
         self.viewer = self._viewers.get(mode)
@@ -109,6 +111,8 @@ class RobotEnv(gym.GoalEnv):
             if mode == 'human':
                 self.viewer = mujoco_py.MjViewer(self.sim)
             elif mode == 'keyboard':
+                self.viewer = mujoco_py.MjViewerKeyboard(self.sim)
+            elif mode == 'controller':
                 self.viewer = mujoco_py.MjViewerController(self.sim)
             elif mode == 'rgb_array':
                 self.viewer = mujoco_py.MjRenderContextOffscreen(self.sim, device_id=-1)

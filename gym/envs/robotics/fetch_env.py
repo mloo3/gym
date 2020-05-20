@@ -42,6 +42,8 @@ class FetchEnv(robot_env.RobotEnv):
         self.target_range = target_range
         self.distance_threshold = distance_threshold
         self.reward_type = reward_type
+        self.mode = None
+        self.actions = []
 
         super(FetchEnv, self).__init__(
             model_path=model_path, n_substeps=n_substeps, n_actions=4,
@@ -69,8 +71,11 @@ class FetchEnv(robot_env.RobotEnv):
 
     def _set_action(self, action):
         assert action.shape == (4,)
-        action = self.viewer.action.copy()
+        if self.mode == "controller":
+            self.viewer.joystick_callback(0)
+        action = self.viewer.action.copy() # get action from user
         action = action.copy()  # ensure that we don't change the action outside of this scope
+        self.actions.append(action)
         pos_ctrl, gripper_ctrl = action[:3], action[3]
 
         pos_ctrl *= 0.05  # limit maximum change in position
@@ -150,6 +155,8 @@ class FetchEnv(robot_env.RobotEnv):
             object_qpos[:2] = object_xpos
             self.sim.data.set_joint_qpos('object0:joint', object_qpos)
 
+        self.actions = []
+
         self.sim.forward()
         return True
 
@@ -188,4 +195,5 @@ class FetchEnv(robot_env.RobotEnv):
             self.height_offset = self.sim.data.get_site_xpos('object0')[2]
 
     def render(self, mode='human', width=500, height=500):
+        self.mode = mode
         return super(FetchEnv, self).render(mode, width, height)
