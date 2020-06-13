@@ -73,9 +73,10 @@ class FetchEnv(robot_env.RobotEnv):
         assert action.shape == (4,)
         if self.mode == "controller":
             self.viewer.joystick_callback(0)
-        action = self.viewer.action.copy() # get action from user
+            action = self.viewer.action.copy() # get action from user
         action = action.copy()  # ensure that we don't change the action outside of this scope
-        self.actions.append(action)
+        if self.mode == "controller":
+            self.actions.append(action.reshape(1,4).copy()) # hardcoded reshape
         pos_ctrl, gripper_ctrl = action[:3], action[3]
 
         pos_ctrl *= 0.05  # limit maximum change in position
